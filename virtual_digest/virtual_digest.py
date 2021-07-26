@@ -14,11 +14,28 @@ from Bio import SeqIO
 
 from os.path import expanduser
 home = expanduser("~")
+
+# extracting from the database
+bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
+
+from virtual_digest import *
+
+#database_loader.bacteria_database
+
+print(bacteria_database)
+
+#---------------------------------------------------------------------
+
+'''
 record = SeqIO.read(home + "/NC_005816.gb", "genbank")
+
 
 gd_diagram = GenomeDiagram.Diagram(record.id)
 gd_track_for_features = gd_diagram.new_track(1, name="Annotated Features")
 gd_feature_set = gd_track_for_features.new_set()
+'''
+
+#---------------------------------------------------------------------
 
 for feature in record.features:
     if feature.type != "gene":
@@ -73,12 +90,8 @@ gd_diagram.write("plasmid_circular_nice.pdf", "PDF")
 gd_diagram.write("plasmid_circular_nice.eps", "EPS")
 gd_diagram.write("plasmid_circular_nice.svg", "SVG")
 
+#---------------------------------
 
-# print fragments
-# database group, run through data
-    # get a record
-    # list of bacteria
-    # use as input, take forward and reverse seq
-    # do PCR on each
-    # output: seq, or nothing
-    #do virtual digest on PCR
+
+
+
