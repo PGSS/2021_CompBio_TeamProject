@@ -11,7 +11,7 @@
         #take everything between on the forward to reverse
         #slice and take that region out
 
-        #fidning the sight of where the forward primer is bound
+        #finding the sight of where the forward primer is bound
         #gives a start index = this site
         #reverse = STOP index
         #PCR pro
@@ -27,61 +27,133 @@
 
 #loading in the enzyme seq
 
-from Bio import Restriction
 
-from Bio.Restriction import EcoRI
-
-dir()
-['Restriction', '__builtins__', '__doc__', '__name__', '__package__']
-Restriction.EcoRI
-EcoRI
-Restriction.EcoRI.site
-'GAATTC'
+#dir()
+#['Restriction', '__builtins__', '__doc__', '__name__', '__package__']
+#Restriction.EcoRI
+#EcoRI
+#Restriction.EcoRI.site
+#'GAATTC'
 
 
 from Bio.Seq import Seq
 my_seq = Seq('AAAAAAAAAAAAAA')
-my_seq
-Seq('AAAAAAAAAAAAAA')
+#my_seq
+#Seq('AAAAAAAAAAAAAA')
 
-EcoRI.search(my_seq)
+#EcoRI.search(my_seq)
 
 
 # Retrieving the sequences produced by a digestion
 
-ecoseq = my_seq + Seq(EcoRI.site) + my_seq
-ecoseq
+#ecoseq = my_seq + Seq(EcoRI.site) + my_seq
+#ecoseq
 Seq('AAAAAAAAAAAAAAGAATTCAAAAAAAAAAAAAA')
-EcoRI.search(ecoseq)
+#EcoRI.search(ecoseq)
 [16]
 
-print(ecoseq[:15], ecoseq[15:])
+'''print(ecoseq[:15], ecoseq[15:])
 print(EcoRI.catalyze(ecoseq))
 print(EcoRI.search(ecoseq, linear=False))
 #[16]
 EcoRI.catalyse(ecoseq, linear=False)
 #(Seq('AATTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'))
 ecoseq  # for memory
-#Seq('AAAAAAAAAAAAAAGAATTCAAAAAAAAAAAAAA')
+#Seq('AAAAAAAAAAAAAAGAATTCAAAAAAAAAAAAAA')'''
 
 
-EcoRI.search(ecoseq, linear=False)
+'''EcoRI.search(ecoseq, linear=False)
 #[16]
 EcoRI.catalyse(ecoseq, linear=False)
 #(Seq('AATTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'),)
-ecoseq  # for memory
+ecoseq  # for memory'''
 
-# circular sequences
+''''# circular sequences
 new_seq = Seq('TTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAA')
 EcoRI.search(new_seq)
-EcoRI.search(new_seq, linear=False)
+EcoRI.search(new_seq, linear=False)'''
 
-#gies enqyme seq
+# creating RestrictionBatch
+import Bio
+from Bio import Restriction
+from Bio.Restriction import *
+rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
+# analyze sequence w/ RestrictionBatch
+sequence = Seq('''TCCTACGGGAGGCAGCAGTGGGGAATATTGCACAATGGGCGCAAGCCTGATGCAGCCATG
+CCGCGTGTATGAAGAAGGCCTTCGGGTTGTAAAGTACTTTCAGCGGGGAGGAAGGGAGTA
+AAGTTAATACCTTTGCTCATTGACGTTACCCGCAGAAGAAGCACCGGCTAACTCCGTGCC
+AGCAGCCGCGGTAATACGGAGGGTGCAAGCGTTAATCGGAATTACTGGGCGTAAAGCGCA
+CGCAGGCGGTTTGTTAAGTCAGATGTGAAATCCCCGGGCTCAACCTGGGAACTGCATCTG
+ATACTGGCAAGCTTGAGTCTCGTAGAGGGGGGTAGAATTCCAGGTGTAGCGGTGAAATGC
+GTAGAGATCTGGAGGAATACCGGTGGCGAAGGCGGCCCCCTGGACGAAAACTGACGCTCA
+GGTGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGA
+TGTCGACTTGGAGGTTGTGCCCTTGAGGCGTGGCTTCCGGAGCTAACGCGTTAAGTCGAC
+CGCCTGGGGAGTACGGCCGCAAGGTTAAAACTCAAATGAATTGACGGGGGCCCGCACAAG
+CGGTGGAGCATGTGGTTTAATTCGATGCAACGCGAAGAACCTTACCTGGTCTTGACATCC
+ACAGAACCTTGTAGAGATACGAGGGTGCCTTCGGGAACTGTGAGACAGGTGCTGCATGGC
+TGTCGTCAGCTCGTGTTGTGAAATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTATC
+CTTTGTTGCCAGCGGTCCGGCCGGGAACTCAAAGGAGACTGCCAGTGATAAACTGGAGGA
+AGGTGGGGATGACGTCAAGTCATCATGGCCCTTACGACCAGGGCTACACACGTGCTACAA
+TGGCGCATACAAAGAGAAGCGACCTCGCGAGAGCAAGCGGACCTCATAAAGTGCGTCGTA
+GTCCGGATTGGAGTCTGCAACTCGACTCCATGAAGTCGGAATCGCTAGTAATCGTGGATC
+AGAATGTCACGGTGAATACGTTCCCGGGCCTTGTACACACCGCCCGTCACACCATGGGAG
+TGGGTTGCAAAAGAAGTAGGTAGCTTAACCTTCGGGAGGGCGCTTACCACTTTGTGATTC 
+ATGACTGGGGTGAAGTCGTAACAAGGTAACC''')
+sequence = sequence.replace(" ","")
+sequence = sequence.replace("\n", "")
+seq_dict = rb.search(sequence)
+print(seq_dict)
 
+def find_Lengths(sequence, seq_dict):
+    #create new dictionary with same keys as seq_dict
+    length_dict = {} #empty dictionary
+    for key in seq_dict:
+        lengths = []
+        for i in range(len(seq_dict[key])):
+            if i==0:
+                lengths.append(seq_dict[key][0])
+            else:
+                lengths.append(seq_dict[key][i]-seq_dict[key][i-1])
+                if i==len(seq_dict[key])-1:
+                    lengths.append(len(sequence) - seq_dict[key][i])
+        length_dict[key] = lengths
+    return length_dict
 
+    #use for loop for each key in seq_dict
+        #make new list for fragment length values
+        #another for loop to subtract between elements in the list of cut sites
 
+print(find_Lengths(sequence, seq_dict))
+print(len(sequence))
 
+#import database
 
+import Bio
+from Bio import SeqIO
+from os.path import expanduser
+
+home = expanduser("~")
+
+bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
+
+'''
+for seq_record in SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta"):
+    print(seq_record.id)
+    print(repr(seq_record.seq))
+    print(len(seq_record))
+'''
+
+counter = 1
+for seq_record in bacteria_database:
+    print(seq_record.id)
+    print(repr(seq_record.seq))
+    print(len(seq_record))
+    print()
+    counter += 1
+    if(counter > 10):
+        break
+#iterate through each sequence in database
+#make output object w/ bacteria name, number, & dictionary of fragment lengths
 
 
