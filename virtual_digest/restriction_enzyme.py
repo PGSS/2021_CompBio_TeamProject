@@ -1,33 +1,3 @@
-#get a set of primers
-    #for each bacteria record
-    #get PCR out of the record
-    #take exyme in, use chunk and run the virtual enqyme digest
-
-    #METHOD
-        #Func: takes PCR product and enzyme and gets chunks
-        #func: takes a full record and gives back the PCR product
-
-        #two index of forward and reverse
-        #take everything between on the forward to reverse
-        #slice and take that region out
-
-        #finding the sight of where the forward primer is bound
-        #gives a start index = this site
-        #reverse = STOP index
-        #PCR pro
-
-# database group, run through data
-    # get a record
-    # list of bacteria
-    # use as input, take forward and reverse seq
-    # (dont need0 do PCR on each
-    # output: seq, or nothing
-    #do virtual digest on PCR
-
-
-#loading in the enzyme seq
-
-
 #dir()
 #['Restriction', '__builtins__', '__doc__', '__name__', '__package__']
 #Restriction.EcoRI
@@ -137,12 +107,6 @@ home = expanduser("~")
 
 bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
 
-'''
-for seq_record in SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta"):
-    print(seq_record.id)
-    print(repr(seq_record.seq))
-    print(len(seq_record))
-'''
 #make a class containing bacteria name, id, and length dict
 class BacteriaInfo:
     def __init__(self, name, id, length_dict):
@@ -150,25 +114,45 @@ class BacteriaInfo:
         self.id = id
         self.lengths = length_dict
 
-#iterate through each sequence in database
 counter = 1
+
+seq_name = []
+
 for seq_record in bacteria_database:
+
+    seq_name.append(seq_record)
+
     sequence = seq_record.seq
     sequence = sequence.replace(" ", "")
     sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
     length_dict = find_Lengths(sequence, seq_dict)
     bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
-    print(bac.name)
-    print(bac.id)
-    print(bac.lengths)
-    print()
+        #print(bac.name)
+        #print(bac.id)
+        #print(bac.lengths)
+        #print()
+
     counter += 1
-    if(counter > 10):
+    if (counter > 10):
         break
 
+for i in range(0,len(seq_name)):
+    print(seq_name[i])
 
+'''
+def pos_reducer(seq_name, seq):
+    # iterate through each sequence in database
 
-#make output object w/ bacteria name, number, & dictionary of fragment lengths
+    for i in range(0, len(seq)-1):
 
+        if(seq[i].lengths['fragment_sizes'] == seq_name[i].lengths['fragment_sizes']):
 
+            for key in seq[i].lengths:
+                if (seq[i].lengths[key] == seq_name[i].lengths[key]) :
+                    seq[i].name = seq_name[i].name
+
+    return seq
+
+pos_reducer(seq_name, )
+'''
