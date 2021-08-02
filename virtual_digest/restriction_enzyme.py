@@ -146,6 +146,7 @@ def pos_reducer(seq_name, seq):
 
     for i in range(0, len(seq)-1):
 
+        #
         if(seq[i].lengths['fragment_sizes'] == seq_name[i].lengths['fragment_sizes']):  #compare range
 
             for key in seq[i].lengths:
@@ -154,12 +155,16 @@ def pos_reducer(seq_name, seq):
 
     return seq
 
+
+import csv
+home = expanduser("~")
+with open(home + "/test_data_bacteria.csv", 'r') as file:
+    test_reader = csv.reader(file, delimiter=',')
+    for row in test_reader:
+        print(row)
+
 #pos_reducer(seq_name, test_data)
 
-import pandas as pd
 
-see = pd.read_csv(r"C:\Users\Hannah Chang\Desktop\PyCharm Community Edition 2021.1.3\test_data_bacteria.csv")
-print(see)
-#see = pd.read_csv(r"C:\Users\Hannah Chang\Desktop\PyCharm Community Edition 2021.1.3\test_data_bacteria.csv")
-#see.to_csv("test")
-#print(pd.read_csv("test")
+
+
