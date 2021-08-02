@@ -1,47 +1,10 @@
-#dir()
-#['Restriction', '__builtins__', '__doc__', '__name__', '__package__']
-#Restriction.EcoRI
-#EcoRI
-#Restriction.EcoRI.site
-#'GAATTC'
+from types import List
 
 
 from Bio.Seq import Seq
 my_seq = Seq('AAAAAAAAAAAAAA')
-#my_seq
-#Seq('AAAAAAAAAAAAAA')
 
-#EcoRI.search(my_seq)
-
-
-# Retrieving the sequences produced by a digestion
-
-#ecoseq = my_seq + Seq(EcoRI.site) + my_seq
-#ecoseq
 Seq('AAAAAAAAAAAAAAGAATTCAAAAAAAAAAAAAA')
-#EcoRI.search(ecoseq)
-[16]
-
-'''print(ecoseq[:15], ecoseq[15:])
-print(EcoRI.catalyze(ecoseq))
-print(EcoRI.search(ecoseq, linear=False))
-#[16]
-EcoRI.catalyse(ecoseq, linear=False)
-#(Seq('AATTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'))
-ecoseq  # for memory
-#Seq('AAAAAAAAAAAAAAGAATTCAAAAAAAAAAAAAA')'''
-
-
-'''EcoRI.search(ecoseq, linear=False)
-#[16]
-EcoRI.catalyse(ecoseq, linear=False)
-#(Seq('AATTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAG'),)
-ecoseq  # for memory'''
-
-''''# circular sequences
-new_seq = Seq('TTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAA')
-EcoRI.search(new_seq)
-EcoRI.search(new_seq, linear=False)'''
 
 # creating RestrictionBatch
 import Bio
@@ -73,7 +36,7 @@ ATGACTGGGGTGAAGTCGTAACAAGGTAACC''')
 sequence = sequence.replace(" ","")
 sequence = sequence.replace("\n", "")
 seq_dict = rb.search(sequence)
-print(seq_dict)
+#print(seq_dict)
 
 def find_Lengths(sequence, seq_dict):
     #create new dictionary with same keys as seq_dict
@@ -90,80 +53,103 @@ def find_Lengths(sequence, seq_dict):
         length_dict[key] = lengths
     return length_dict
 
-    #use for loop for each key in seq_dict
-        #make new list for fragment length values
-        #another for loop to subtract between elements in the list of cut sites
-
-print(find_Lengths(sequence, seq_dict))
-print(len(sequence))
-
-#import database
+#print(find_Lengths(sequence,seq_dict))
 
 import Bio
 from Bio import SeqIO
 from os.path import expanduser
 
 home = expanduser("~")
-
 bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
 
 #make a class containing bacteria name, id, and length dict
 class BacteriaInfo:
+
+    #initializer
     def __init__(self, name, id, length_dict):
         self.name = name
         self.id = id
         self.lengths = length_dict
 
-counter = 1
+    #change representation to string
+    def __str__(self):
+        return f"{{name: {self.name}, id: {self.id}, lengths: {self.lengths}}}\n"
+    def __repr__(self):
+        return self.__str__()
 
 seq_name = []
 
+
+import pandas as pd
+import csv
+home = expanduser("~")
+
+#col_list = ['Bacteria Name', 'Bacteria Sequence File Name', 'Length of PCR Product', 'PCR Product', 'AluI', 'HaeIII', 'MboI']
+df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
+
+def create_dict_from_row(row):
+    test = {'AluI': [], 'HaeIII': [], 'MboI': []}
+    test['AluI'] = [int(x) for x in row['AluI'].split(',')]
+    test['HaeIII'] = [int(x) for x in row['HaeIII'].split(',')]
+    test['MboI'] = [int(x) for x in row['MboI'].split(',')]
+
+    return test
+
+test_data = []
+
+for idx, row in df.iterrows():
+    length_dict = create_dict_from_row(row)
+    name = row['Bacteria Name']
+    id = name
+    test_data.append(BacteriaInfo(name, id, length_dict))
+
+print(test_data)
+
 for seq_record in bacteria_database:
-
     seq_name.append(seq_record)
-
     sequence = seq_record.seq
     sequence = sequence.replace(" ", "")
     sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
     length_dict = find_Lengths(sequence, seq_dict)
     bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
-        #print(bac.name)
-        #print(bac.id)
-        #print(bac.lengths)
-        #print()
 
-    counter += 1
-    if (counter > 10):
-        break
+counter = 0
 
-#for i in range(0,len(seq_name)):
-   # print(seq_name[i])
+# Fragment Comparer
+def fragment_comparer(candidate_list : List[int], lab_list : List[int]) :
+
+    #exclude smaller than Alejandro's number: 100, 50
+    #exclude if it [] and other has
+
+    if
+    #within 10%
+
+    return False
+
+# input: takes in list of bacteriaInfo objects (database)
+#       takes in a single bacteriaInfo object (lab data)
+
+#returns: list of bacteriaInfo objects from database that match lab data (empty-#)
+
+def pos_reducer(database_list : List[BacteriaInfo], lab_data : BacteriaInfo):
+
+    possible_matches = []
+
+    for bacteria in database_list:
+        haeIII = fragment_comparer(bacteria.lengths["HaeIII"], lab_data.lengths["HaeIII"])
+        mboI = fragment_comparer(bacteria.lengths["MboI"], lab_data.lengths["MboI"])
+        aluI = fragment_comparer(bacteria.lengths["AluI"], lab_data.lengths["AluI"])
+
+        if haeIII and mboI and aluI:
+            possible_matches.append(bacteria)
+
+    return possible_matches
+
+#pos_reducer()
+#print(counter)
 
 
-def pos_reducer(seq_name, seq):
-    # iterate through each sequence in database
-
-    for i in range(0, len(seq)-1):
-
-        #
-        if(seq[i].lengths['fragment_sizes'] == seq_name[i].lengths['fragment_sizes']):  #compare range
-
-            for key in seq[i].lengths:
-                if (seq[i].lengths[key] == seq_name[i].lengths[key]) :
-                    seq[i].name = seq_name[i].name
-
-    return seq
-
-
-import csv
-home = expanduser("~")
-with open(home + "/test_data_bacteria.csv", 'r') as file:
-    test_reader = csv.reader(file, delimiter=',')
-    for row in test_reader:
-        print(row)
-
-#pos_reducer(seq_name, test_data)
 
 
 
