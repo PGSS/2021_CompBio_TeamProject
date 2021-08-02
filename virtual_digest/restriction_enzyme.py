@@ -137,16 +137,16 @@ for seq_record in bacteria_database:
     if (counter > 10):
         break
 
-for i in range(0,len(seq_name)):
-    print(seq_name[i])
+#for i in range(0,len(seq_name)):
+   # print(seq_name[i])
 
-'''
+
 def pos_reducer(seq_name, seq):
     # iterate through each sequence in database
 
     for i in range(0, len(seq)-1):
 
-        if(seq[i].lengths['fragment_sizes'] == seq_name[i].lengths['fragment_sizes']):
+        if(seq[i].lengths['fragment_sizes'] == seq_name[i].lengths['fragment_sizes']):  #compare range
 
             for key in seq[i].lengths:
                 if (seq[i].lengths[key] == seq_name[i].lengths[key]) :
@@ -154,5 +154,12 @@ def pos_reducer(seq_name, seq):
 
     return seq
 
-pos_reducer(seq_name, )
-'''
+#pos_reducer(seq_name, test_data)
+
+import pandas as pd
+
+see = pd.read_csv(r"C:\Users\Hannah Chang\Desktop\PyCharm Community Edition 2021.1.3\test_data_bacteria.csv")
+print(see)
+#see = pd.read_csv(r"C:\Users\Hannah Chang\Desktop\PyCharm Community Edition 2021.1.3\test_data_bacteria.csv")
+#see.to_csv("test")
+#print(pd.read_csv("test")
