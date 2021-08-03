@@ -100,7 +100,7 @@ class BacteriaInfo:
     def __repr__(self):
         return self.__str__()
 home = expanduser("~")
-bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
+#bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
 count = 0
 #record in bacteria_database:
 #    count = count + 1
@@ -123,7 +123,7 @@ for idx, row in df.iterrows():
 print(test_data[0])
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
-
+'''
 print("starting database analysis: ")
 
 ecoli_seq = []
@@ -145,6 +145,11 @@ for seq_record in bacteria_database:
 print("ecoli sequences", len(ecoli_seq))
 SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
 exit(0)
+'''
+
+#manually making test records
+test_record = {}
+
 
 bac_list = []
 possible_matches = []
@@ -158,6 +163,9 @@ for bac in test_data:
 ecoli_database = list(SeqIO.parse(home+'/ecoli.fasta','fasta'))
 print(len(ecoli_database))
 for seq_record in ecoli_database:
+    if (seq_count==0):
+        print(seq_record)
+
     sequence = seq_record.seq
     sequence = sequence.replace(" ", "")
     sequence = sequence.replace("\n", "")
@@ -188,6 +196,7 @@ print(test_matches)
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
+'''
 bac_list = []
 possible_matches = []
 seq_count = 0
@@ -220,7 +229,7 @@ for seq_record in bacteria_database:
 
 print('In ', seq_count, 'sequences ', match_count, 'matched')
 print(possible_matches)
-
+'''
 #how to not enter the douplicate sequences
 
 
