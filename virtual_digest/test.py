@@ -164,8 +164,16 @@ for seq_record in bacteria_database:
     seq_count = seq_count + 1
     if seq_count % 10000 == 0:
         print('in ',seq_count,' sequences, found ',match_count, ' matches')
+
+    if seq_count == 20000 :
+        for members in possible_matches:
+            print(members)
+
 print('In ', seq_count, 'sequences ', match_count, 'matched')
 print(possible_matches)
+
+#how to not enter the douplicate sequences
+
 
 
 
