@@ -124,7 +124,6 @@ print(test_data[0])
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
-'''
 print("starting database analysis: ")
 
 ecoli_seq = []
@@ -132,6 +131,8 @@ ecoli_seq = []
 for seq_record in bacteria_database:
     if 'Escherichia coli' in seq_record.description:
         ecoli_seq.append(seq_record)
+        if 'TCCTACGGGAGGCAGCAGT' in seq_record.seq:
+            print("contains forward primer", seq_record.id)
 
         print(seq_record.description)
         sequence = seq_record.seq
@@ -140,9 +141,11 @@ for seq_record in bacteria_database:
         seq_dict = rb.search(sequence)
         length_dict = find_Lengths(sequence, seq_dict)
         print(length_dict)
+
+print("ecoli sequences", len(ecoli_seq))
 SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
 exit(0)
-'''
+
 bac_list = []
 possible_matches = []
 seq_count = 0
