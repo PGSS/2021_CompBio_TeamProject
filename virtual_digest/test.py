@@ -28,6 +28,8 @@ def create_dict_from_row(row):
     test['HaeIII'] = [int(x) for x in row['HaeIII'].split(',')]
     test['MboI'] = [int(x) for x in row['MboI'].split(',')]
     return test
+
+MINIMUM_BASE_PAIR = 50
 ###################################################
 # Fragment Comparer
 def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[int]):
@@ -35,28 +37,39 @@ def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[i
     #exclude smaller than Alejandro's number: 100, 50
     #exclude if it [] and other has
 
-    num_true = 0
+    if (len(candidate_list) == 0 and len(lab_list) != 0):
+        print("one dooesn't digest", candidate_list, lab_list)
+        return False
+
+    filtered_candidates = [x for x in candidate_list if x > MINIMUM_BASE_PAIR]
+    filtered_candidates.sort()
+
+    filtered_lab = [x for x in lab_list if x > MINIMUM_BASE_PAIR]
+    filtered_lab.sort()
+
+    if len(filtered_candidates) != len(filtered_lab):
+        print("different products after filter", filtered_candidates, filtered_lab)
+        return False
+
     #1: comparing each number to see if it fit within range
-    for i in range(len(candidate_list)):
-        for j in range(len(lab_list)):
-            if (abs(candidate_list[i]-lab_list[j]) <= 15):
-                num_true += 1
-                break
-        #stats
-        if (num_true/len(candidate_list) >= 0.9):
-            return True
-    return False
+    for i in range(len(filtered_candidates)):
+        if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.1 * filtered_lab[i]):
+            print("invalid comparison", filtered_candidates[i], filtered_lab[i], filtered_candidates, filtered_lab)
+            return False
+
+    return True
 
 ##############################################################################################
-# input: takes in list of bacteriaInfo objects (database)
+# input: takes in lis
+# t of bacteriaInfo objects (database)
 #       takes in a single bacteriaInfo object (lab data)
 #returns: list of bacteriaInfo objects from database that match lab data (empty-#)
 
-'''
+
 def pos_reducer(database_list, lab_data): #: List[BacteriaInfo], lab_data : BacteriaInfo):
 
     possible_matches = []
-
+    processed = 0
     for bacteria in database_list:
         for result in lab_data:
             haeIII = fragment_comparer(bacteria.lengths[HaeIII], result.lengths['HaeIII'])
@@ -65,10 +78,13 @@ def pos_reducer(database_list, lab_data): #: List[BacteriaInfo], lab_data : Bact
             if haeIII and mboI and aluI:
                 print(bacteria)
                 possible_matches.append(bacteria)
-            else:
-                print(bacteria.name, 'no match')
+            processed += 1
+            if processed % 1000:
+                print(f"proceseed {processed} records, found: {len(possible_matches)}, matches")
     return possible_matches
-'''
+
+
+
 #make a class containing bacteria name, id, and length dict
 class BacteriaInfo:
 
@@ -104,7 +120,68 @@ for idx, row in df.iterrows():
     id = name
     test_data.append(BacteriaInfo(name, id, length_dict))
 
-#print(test_data[0].lengths['AluI'])
+print(test_data[0])
+
+rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
+
+'''
+print("starting database analysis: ")
+
+ecoli_seq = []
+
+for seq_record in bacteria_database:
+    if 'Escherichia coli' in seq_record.description:
+        ecoli_seq.append(seq_record)
+
+        print(seq_record.description)
+        sequence = seq_record.seq
+        sequence = sequence.replace(" ", "")
+        sequence = sequence.replace("\n", "")
+        seq_dict = rb.search(sequence)
+        length_dict = find_Lengths(sequence, seq_dict)
+        print(length_dict)
+SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
+exit(0)
+'''
+bac_list = []
+possible_matches = []
+seq_count = 0
+match_count = 0
+
+test_matches = {}
+for bac in test_data:
+    test_matches[bac.name] = []
+
+ecoli_database = list(SeqIO.parse(home+'/ecoli.fasta','fasta'))
+print(len(ecoli_database))
+for seq_record in ecoli_database:
+    sequence = seq_record.seq
+    sequence = sequence.replace(" ", "")
+    sequence = sequence.replace("\n", "")
+    seq_dict = rb.search(sequence)
+    #print(seq_dict)
+    length_dict = find_Lengths(sequence, seq_dict)
+    #print(length_dict)
+    bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
+    #bac_list.append(bac)
+    #break
+
+    for result in [test_data[0]]:
+
+        haeIII = fragment_comparer(bac.lengths[HaeIII], result.lengths['HaeIII'])
+        mboI = fragment_comparer(bac.lengths[MboI], result.lengths['MboI'])
+        aluI = fragment_comparer(bac.lengths[AluI], result.lengths['AluI'])
+        if haeIII and mboI and aluI:
+            match_count = match_count + 1
+            test_matches[result.name].append(bac)
+    seq_count = seq_count + 1
+    if seq_count % 10000 == 0:
+        print('in ',seq_count,' sequences, found ',match_count, ' matches')
+
+print(test_matches)
+#print('In ', seq_count, 'sequences ', match_count, 'matched')
+#print(possible_matches)
+
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
@@ -133,39 +210,8 @@ for seq_record in bacteria_database:
     seq_count = seq_count + 1
     if seq_count % 10000 == 0:
         print('in ',seq_count,' sequences, found ',match_count, ' matches')
-print('In ', seq_count, 'sequences ', match_count, 'matched')
-print(possible_matches)
 
-
-rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
-
-bac_list = []
-possible_matches = []
-seq_count = 0
-match_count = 0
-for seq_record in bacteria_database:
-    sequence = seq_record.seq
-    sequence = sequence.replace(" ", "")
-    sequence = sequence.replace("\n", "")
-    seq_dict = rb.search(sequence)
-    #print(seq_dict)
-    length_dict = find_Lengths(sequence, seq_dict)
-    #print(length_dict)
-    bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
-    #bac_list.append(bac)
-    #break
-    for result in test_data:
-        haeIII = fragment_comparer(bac.lengths[HaeIII], result.lengths['HaeIII'])
-        mboI = fragment_comparer(bac.lengths[MboI], result.lengths['MboI'])
-        aluI = fragment_comparer(bac.lengths[AluI], result.lengths['AluI'])
-        if haeIII and mboI and aluI:
-            match_count = match_count + 1
-            possible_matches.append(bac)
-    seq_count = seq_count + 1
-    if seq_count % 10000 == 0:
-        print('in ',seq_count,' sequences, found ',match_count, ' matches')
-
-    if seq_count == 20000 :
+    if seq_count == 20000:
         for members in possible_matches:
             print(members)
 
