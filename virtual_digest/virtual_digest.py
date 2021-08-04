@@ -29,7 +29,6 @@ print(bacteria_database)
 '''
 record = SeqIO.read(home + "/NC_005816.gb", "genbank")
 
-
 gd_diagram = GenomeDiagram.Diagram(record.id)
 gd_track_for_features = gd_diagram.new_track(1, name="Annotated Features")
 gd_feature_set = gd_track_for_features.new_set()

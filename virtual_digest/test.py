@@ -111,7 +111,9 @@ count = 0
 #count = 0
 #print(seq_record.seq)
 
-df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
+#df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
+df = pd.read_csv(home + "/real_lab_data.csv", header=0)
+
 test_data = []
 
 for idx, row in df.iterrows():
