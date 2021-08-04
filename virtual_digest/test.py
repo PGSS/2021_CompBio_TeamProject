@@ -123,10 +123,16 @@ for idx, row in df.iterrows():
 #print(test_data[0])
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
-'''
+
 print("starting database analysis: ")
 
 ecoli_seq = []
+
+'''
+#check if these are in the database
+'Helicobacter pylori'
+'Yersinia pestis'
+'''
 
 for seq_record in bacteria_database:
     if 'Escherichia coli' in seq_record.description:
@@ -145,7 +151,7 @@ for seq_record in bacteria_database:
 print("ecoli sequences", len(ecoli_seq))
 SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
 exit(0)
-'''
+
 
 #manually making test records
 test_record = {}
@@ -185,12 +191,12 @@ for seq_record in bacteria_database:
             test_matches[result.name].append(result)
 
     seq_count = seq_count + 1
-    if seq_count % 10000 == 0:
-        print('in ',seq_count,' sequences, found ',match_count, ' matches')
+    #if seq_count % 10000 == 0:
+        #print('in ',seq_count,' sequences, found ',match_count, ' matches')
 
-print('In ', seq_count, 'sequences ', match_count, 'matched')
-print(possible_matches)
-print(test_matches)
+#print('In ', seq_count, 'sequences ', match_count, 'matched')
+#print(possible_matches)
+#print(test_matches)
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
