@@ -38,7 +38,7 @@ def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[i
     #exclude if it [] and other has
 
     if (len(candidate_list) == 0 and len(lab_list) != 0):
-        print("one dooesn't digest", candidate_list, lab_list)
+        #print("one dooesn't digest", candidate_list, lab_list)
         return False
 
     filtered_candidates = [x for x in candidate_list if x > MINIMUM_BASE_PAIR]
@@ -48,13 +48,13 @@ def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[i
     filtered_lab.sort()
 
     if len(filtered_candidates) != len(filtered_lab):
-        print("different products after filter", filtered_candidates, filtered_lab)
+        #print("different products after filter", filtered_candidates, filtered_lab)
         return False
 
     #1: comparing each number to see if it fit within range
     for i in range(len(filtered_candidates)):
-        if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.2 * filtered_lab[i]):
-            print("invalid comparison", filtered_candidates[i], filtered_lab[i], filtered_candidates, filtered_lab)
+        if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.1 * filtered_lab[i]):
+            #print("invalid comparison", filtered_candidates[i], filtered_lab[i], filtered_candidates, filtered_lab)
             return False
 
     return True
@@ -160,15 +160,12 @@ test_matches = {}
 for bac in test_data:
     test_matches[bac.name] = []
 
-ecoli_database = list(SeqIO.parse(home+'/ecoli.fasta','fasta'))
-print(len(ecoli_database))
-for seq_record in ecoli_database:
+bacteria_database = list(SeqIO.parse(home+'/pcr_product.fa','fasta'))
+for seq_record in bacteria_database:
     if (seq_count==0):
         print(seq_record)
 
     sequence = seq_record.seq
-    sequence = sequence.replace(" ", "")
-    sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
     #print(seq_dict)
     length_dict = find_Lengths(sequence, seq_dict)
@@ -177,7 +174,7 @@ for seq_record in ecoli_database:
     #bac_list.append(bac)
     #break
 
-    for result in [test_data[0]]:
+    for result in test_data:
 
         haeIII = fragment_comparer(bac.lengths[HaeIII], result.lengths['HaeIII'])
         mboI = fragment_comparer(bac.lengths[MboI], result.lengths['MboI'])
