@@ -53,7 +53,7 @@ def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[i
 
     #1: comparing each number to see if it fit within range
     for i in range(len(filtered_candidates)):
-        if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.1 * filtered_lab[i]):
+        if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.2 * filtered_lab[i]):
             print("invalid comparison", filtered_candidates[i], filtered_lab[i], filtered_candidates, filtered_lab)
             return False
 
@@ -120,7 +120,7 @@ for idx, row in df.iterrows():
     id = name
     test_data.append(BacteriaInfo(name, id, length_dict))
 
-print(test_data[0])
+#print(test_data[0])
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 '''
@@ -185,14 +185,15 @@ for seq_record in ecoli_database:
         if haeIII and mboI and aluI:
             match_count = match_count + 1
             test_matches[result.name].append(bac)
+            test_matches[result.name].append(result)
+
     seq_count = seq_count + 1
     if seq_count % 10000 == 0:
         print('in ',seq_count,' sequences, found ',match_count, ' matches')
 
+print('In ', seq_count, 'sequences ', match_count, 'matched')
+print(possible_matches)
 print(test_matches)
-#print('In ', seq_count, 'sequences ', match_count, 'matched')
-#print(possible_matches)
-
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
