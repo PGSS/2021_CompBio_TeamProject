@@ -14,28 +14,13 @@ def find_Lengths(sequence, seq_dict):
         lengths = []
         for i in range(len(seq_dict[key])):
             if i==0:
-                lengths.append(seq_dict[key][0]-1)
+                lengths.append(seq_dict[key][0])
             else:
                 lengths.append(seq_dict[key][i]-seq_dict[key][i-1])
                 if i==len(seq_dict[key])-1:
-                    lengths.append(len(sequence) - seq_dict[key][i] +1)
+                    lengths.append(len(sequence) - seq_dict[key][i])
         length_dict[key] = lengths
     return length_dict
-
-#make a class containing bacteria name, id, and length dict
-class BacteriaInfo:
-
-    #initializer
-    def __init__(self, name, id, length_dict):
-        self.name = name
-        self.id = id
-        self.lengths = length_dict
-
-    #change representation to string
-    def __str__(self):
-        return f"{{name: {self.name}, id: {self.id}, lengths: {self.lengths}}}\n"
-    def __repr__(self):
-        return self.__str__()
 
 def create_dict_from_row(row):
     test = {'AluI': [], 'HaeIII': [], 'MboI': []}
@@ -44,20 +29,7 @@ def create_dict_from_row(row):
     test['MboI'] = [int(x) for x in row['MboI'].split(',')]
     return test
 
-test_data = []
-home = expanduser("~")
-bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
-#df = pd.read_csv(home + "/test_bacteria_data.csv", header=0)
-df = pd.read_csv(home + "/real_lab_data.csv", header=0)
-#df_new = df[df['AluI'].notnull()]
-
-for idx, row in df.iterrows():
-    length_dict = create_dict_from_row(row)
-    name = row['Bacteria Name']
-    id = name
-    test_data.append(BacteriaInfo(name, id, length_dict))
-
-MINIMUM_BASE_PAIR = 100
+MINIMUM_BASE_PAIR = 50
 ###################################################
 # Fragment Comparer
 def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[int]):
@@ -113,8 +85,20 @@ def pos_reducer(database_list, lab_data): #: List[BacteriaInfo], lab_data : Bact
 
 
 
+#make a class containing bacteria name, id, and length dict
+class BacteriaInfo:
 
+    #initializer
+    def __init__(self, name, id, length_dict):
+        self.name = name
+        self.id = id
+        self.lengths = length_dict
 
+    #change representation to string
+    def __str__(self):
+        return f"{{name: {self.name}, id: {self.id}, lengths: {self.lengths}}}\n"
+    def __repr__(self):
+        return self.__str__()
 home = expanduser("~")
 bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
 count = 0
@@ -128,20 +112,15 @@ count = 0
 #print(seq_record.seq)
 
 #df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
-
-bacteria_database = list(SeqIO.parse(home+'/pcr_product.fa','fasta'))
+#df = pd.read_csv(home + "/real_lab_data.csv", header=0)
 
 test_data = []
 
-#df = pd.read_csv(home + "/real_lab_data.csv", header=0)
-df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
-#df_new = df[df['AluI'].notnull()]
-
-for idx, row in df.iterrows():
+'''for idx, row in bacteria_database.iterrows():
     length_dict = create_dict_from_row(row)
     name = row['Bacteria Name']
     id = name
-    test_data.append(BacteriaInfo(name, id, length_dict))
+    test_data.append(BacteriaInfo(name, id, length_dict))'''
 
 #print(test_data[0])
 
@@ -156,9 +135,9 @@ ecoli_seq = []
 'Helicobacter pylori'
 'Yersinia pestis'
 '''
-'''
+
 for seq_record in bacteria_database:
-    if 'Escherichia coli' in seq_record.description:
+    if 'Yersinia pestis' in seq_record.description:
         ecoli_seq.append(seq_record)
         if 'TCCTACGGGAGGCAGCAGT' in seq_record.seq:
             print("contains forward primer", seq_record.id)
@@ -171,11 +150,11 @@ for seq_record in bacteria_database:
         length_dict = find_Lengths(sequence, seq_dict)
         print(length_dict)
 
-print("ecoli sequences", len(ecoli_seq))
-SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
+print("yersinia sequences", len(ecoli_seq))
+#SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
 exit(0)
-'''
 
+'''
 #manually making test records
 test_record = {}
 
@@ -187,19 +166,21 @@ match_count = 0
 
 test_matches = {}
 for bac in test_data:
-    test_matches[bac.name] = []
+    test_matches[bac.name] = []'''
 
-
+'''bacteria_database = list(SeqIO.parse(home+'/pcr_product.fa','fasta'))
 for seq_record in bacteria_database:
     if (seq_count==0):
         print(seq_record)
 
     sequence = seq_record.seq
-    #sequence = sequence.replace(" ", "")
-    #sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
+    #print(seq_dict)
     length_dict = find_Lengths(sequence, seq_dict)
+    #print(length_dict)
     bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
+    #bac_list.append(bac)
+    #break
 
     for result in test_data:
 
@@ -212,16 +193,14 @@ for seq_record in bacteria_database:
             test_matches[result.name].append(result)
 
     seq_count = seq_count + 1
-    if seq_count % 10000 == 0:
-        print('in ',seq_count,' sequences, found ',match_count, ' matches')
+    #if seq_count % 10000 == 0:
+        #print('in ',seq_count,' sequences, found ',match_count, ' matches')'''
 
-print('In ', seq_count, 'sequences ', match_count, 'matched')
+#print('In ', seq_count, 'sequences ', match_count, 'matched')
 #print(possible_matches)
-print(len(test_matches))
-print(test_matches)
+#print(test_matches)
 
-
-rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
+#rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
 '''
 bac_list = []
@@ -258,8 +237,3 @@ print('In ', seq_count, 'sequences ', match_count, 'matched')
 print(possible_matches)
 '''
 #how to not enter the douplicate sequences
-
-
-
-
-

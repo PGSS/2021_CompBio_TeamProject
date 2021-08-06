@@ -187,7 +187,7 @@ match_count = 0
 
 test_matches = {}
 for bac in test_data:
-    test_matches[bac.name] = []
+    test_matches[bac.name] = [0]
 
 
 for seq_record in bacteria_database:
@@ -195,8 +195,8 @@ for seq_record in bacteria_database:
         print(seq_record)
 
     sequence = seq_record.seq
-    #sequence = sequence.replace(" ", "")
-    #sequence = sequence.replace("\n", "")
+    sequence = sequence.replace(" ", "")
+    sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
     length_dict = find_Lengths(sequence, seq_dict)
     bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
@@ -208,8 +208,9 @@ for seq_record in bacteria_database:
         aluI = fragment_comparer(bac.lengths[AluI], result.lengths['AluI'])
         if haeIII and mboI and aluI:
             match_count = match_count + 1
+
             test_matches[result.name].append(bac)
-            test_matches[result.name].append(result)
+            #test_matches[result.name] += 1
 
     seq_count = seq_count + 1
     if seq_count % 10000 == 0:
