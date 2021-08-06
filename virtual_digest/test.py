@@ -147,119 +147,87 @@ for idx, row in df.iterrows():
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
-print("starting database analysis: ")
+#print("starting database analysis: ")
 
 ecoli_seq = []
-
-'''
-#check if these are in the database
-'Helicobacter pylori'
-'Yersinia pestis'
-'''
-'''
-for seq_record in bacteria_database:
-    if 'Escherichia coli' in seq_record.description:
-        ecoli_seq.append(seq_record)
-        if 'TCCTACGGGAGGCAGCAGT' in seq_record.seq:
-            print("contains forward primer", seq_record.id)
-
-        print(seq_record.description)
-        sequence = seq_record.seq
-        sequence = sequence.replace(" ", "")
-        sequence = sequence.replace("\n", "")
-        seq_dict = rb.search(sequence)
-        length_dict = find_Lengths(sequence, seq_dict)
-        print(length_dict)
-
-print("ecoli sequences", len(ecoli_seq))
-SeqIO.write(ecoli_seq, home+'/ecoli.fasta', 'fasta')
-exit(0)
-'''
 
 #manually making test records
 test_record = {}
 
 
+print("starting database analysis: ")
+pcr_seq = []
 bac_list = []
 possible_matches = []
 seq_count = 0
 match_count = 0
-
 test_matches = {}
-for bac in test_data:
-    test_matches[bac.name] = []
+pcr_count = 0
+pcr_database = {}
+test_bac_found = False
+test_bac_list = []
+test_match_count = {}
 
+for result in test_data:
+    test_match_count[result.name] = 0
 
-for seq_record in bacteria_database:
-    if (seq_count==0):
-        print(seq_record)
+# '''
+# check if these are in the database
 
-    sequence = seq_record.seq
-    #sequence = sequence.replace(" ", "")
-    #sequence = sequence.replace("\n", "")
-    seq_dict = rb.search(sequence)
-    length_dict = find_Lengths(sequence, seq_dict)
-    bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
+count = 0
 
-    for result in test_data:
+pcr_database = list(SeqIO.parse(home + '/pcr_product.fa', 'fasta'))
 
-        haeIII = fragment_comparer(bac.lengths[HaeIII], result.lengths['HaeIII'])
-        mboI = fragment_comparer(bac.lengths[MboI], result.lengths['MboI'])
-        aluI = fragment_comparer(bac.lengths[AluI], result.lengths['AluI'])
-        if haeIII and mboI and aluI:
-            match_count = match_count + 1
-            test_matches[result.name].append(bac)
-            test_matches[result.name].append(result)
-
-    seq_count = seq_count + 1
-    if seq_count % 10000 == 0:
-        print('in ',seq_count,' sequences, found ',match_count, ' matches')
-
-print('In ', seq_count, 'sequences ', match_count, 'matched')
-#print(possible_matches)
-print(len(test_matches))
-print(test_matches)
-
-
-rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
-
-'''
-bac_list = []
-possible_matches = []
-seq_count = 0
-match_count = 0
-for seq_record in bacteria_database:
+print('Total PCR sequences: ', len(pcr_database))
+for seq_record in pcr_database:
+    pcr_count = pcr_count + 1
     sequence = seq_record.seq
     sequence = sequence.replace(" ", "")
     sequence = sequence.replace("\n", "")
     seq_dict = rb.search(sequence)
-    #print(seq_dict)
     length_dict = find_Lengths(sequence, seq_dict)
-    #print(length_dict)
-    bac = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
-    #bac_list.append(bac)
-    #break
+    pcr = BacteriaInfo(seq_record.description, seq_record.id, length_dict)
+
+    test_count = 0
+
     for result in test_data:
-        haeIII = fragment_comparer(bac.lengths[HaeIII], result.lengths['HaeIII'])
-        mboI = fragment_comparer(bac.lengths[MboI], result.lengths['MboI'])
-        aluI = fragment_comparer(bac.lengths[AluI], result.lengths['AluI'])
+        test_count = test_count + 1
+        #        print ('test ', test_count, ':', end='')
+        #        print('HaeII: ', end='')
+        haeIII = fragment_comparer(pcr.lengths[HaeIII], result.lengths['HaeIII'])
+        #        print('         MboI: ', end='')
+        mboI = fragment_comparer(pcr.lengths[MboI], result.lengths['MboI'])
+        #        print(' AluI: ', end='')
+        aluI = fragment_comparer(pcr.lengths[AluI], result.lengths['AluI'])
+
+        test_bac_found = False
         if haeIII and mboI and aluI:
             match_count = match_count + 1
-            possible_matches.append(bac)
-    seq_count = seq_count + 1
-    if seq_count % 10000 == 0:
-        print('in ',seq_count,' sequences, found ',match_count, ' matches')
+            possible_matches.append(seq_record)
 
-    if seq_count == 20000:
-        for members in possible_matches:
-            print(members)
+            if match_count == 1:
+                test_bac_found = False
+            else:
+                for element in test_bac_list:
+                    if element.name == result.name:
+                        test_bac_found = True
+                        test_match_count[result.name] = test_match_count[result.name] + 1
 
-print('In ', seq_count, 'sequences ', match_count, 'matched')
-print(possible_matches)
-'''
-#how to not enter the douplicate sequences
+            if test_bac_found == False:
+                test_bac_list.append(result)
+                test_match_count[result.name] = test_match_count[result.name] + 1
+
+    if pcr_count % 100000 == 0:
+        print('in ', pcr_count, ' PCR sequences, found ', match_count, ' matches')
+
+# print(possible_matches)
+print(test_bac_list)
+
+total = 0
+for match in test_data:
+    total = total + test_match_count[match.name]
+# print('total matches: ', total)
+print(test_match_count)
 
 
-
-
-
+rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
