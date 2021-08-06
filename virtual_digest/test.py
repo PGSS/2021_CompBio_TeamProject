@@ -1,3 +1,12 @@
+##########################################################################################################
+#PROJECT TITLE: Microbial Forensics: Identifying Bacteria and Yeast Using Ribosomal DNA Fingerprints
+#Author: Hannah Chang and Claire Zheng
+#Instrucor: Mr. Andrew McGuier
+#PGSS COMPUTATIONAL BIOLOGLY
+
+###################################################
+#IMPORTING PACKAGES
+
 import Bio
 from Bio import SeqIO
 from os.path import expanduser
@@ -6,6 +15,12 @@ from Bio import Restriction
 from Bio.Restriction import *
 
 import pandas as pd
+
+
+###################################################
+#Function find lengths calculates fragment lengths for bacteria DNA ribosmal sequences given cut sights
+#inputs: takes in a sequences
+#returns: a dictionary of fragment lengths
 
 def find_Lengths(sequence, seq_dict):
     #create new dictionary with same keys as seq_dict
@@ -22,7 +37,8 @@ def find_Lengths(sequence, seq_dict):
         length_dict[key] = lengths
     return length_dict
 
-#make a class containing bacteria name, id, and length dict
+###################################################
+#bacteria class contains bacteria name, id, and length dict
 class BacteriaInfo:
 
     #initializer
@@ -37,6 +53,10 @@ class BacteriaInfo:
     def __repr__(self):
         return self.__str__()
 
+###################################################
+# function creates a dictionary with enzymes set as keys
+# inputs: takes in a row and adds creates a list of fragment legnths from each enzyme
+# returns: the dictionary of fragment lengths
 def create_dict_from_row(row):
     test = {'AluI': [], 'HaeIII': [], 'MboI': []}
     test['AluI'] = [int(x) for x in row['AluI'].split(',')]
@@ -44,22 +64,11 @@ def create_dict_from_row(row):
     test['MboI'] = [int(x) for x in row['MboI'].split(',')]
     return test
 
-test_data = []
-home = expanduser("~")
-bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
-#df = pd.read_csv(home + "/test_bacteria_data.csv", header=0)
-df = pd.read_csv(home + "/real_lab_data.csv", header=0)
-#df_new = df[df['AluI'].notnull()]
-
-for idx, row in df.iterrows():
-    length_dict = create_dict_from_row(row)
-    name = row['Bacteria Name']
-    id = name
-    test_data.append(BacteriaInfo(name, id, length_dict))
-
 MINIMUM_BASE_PAIR = 100
+
 ###################################################
-# Fragment Comparer
+# function compares two lists of fragment lengths
+# returns: true (lists of fragment lengths match) or false (lists of fragment lengths do not match)
 def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[int]):
 
     #exclude smaller than Alejandro's number: 100, 50
@@ -76,108 +85,54 @@ def fragment_comparer(candidate_list, lab_list): #: List[int], lab_list : List[i
     filtered_lab.sort()
 
     if len(filtered_candidates) != len(filtered_lab):
-        #print("different products after filter", filtered_candidates, filtered_lab)
         return False
 
     #1: comparing each number to see if it fit within range
     for i in range(len(filtered_candidates)):
         if (abs(filtered_candidates[i]-filtered_lab[i]) > 0.1 * filtered_lab[i]):
-            #print("invalid comparison", filtered_candidates[i], filtered_lab[i], filtered_candidates, filtered_lab)
             return False
 
     return True
 
-##############################################################################################
-# input: takes in lis
-# t of bacteriaInfo objects (database)
-#       takes in a single bacteriaInfo object (lab data)
-#returns: list of bacteriaInfo objects from database that match lab data (empty-#)
-
-
-def pos_reducer(database_list, lab_data): #: List[BacteriaInfo], lab_data : BacteriaInfo):
-
-    possible_matches = []
-    processed = 0
-    for bacteria in database_list:
-        for result in lab_data:
-            haeIII = fragment_comparer(bacteria.lengths[HaeIII], result.lengths['HaeIII'])
-            mboI = fragment_comparer(bacteria.lengths[MboI], result.lengths['MboI'])
-            aluI = fragment_comparer(bacteria.lengths[AluI], result.lengths['AluI'])
-            if haeIII and mboI and aluI:
-                print(bacteria)
-                possible_matches.append(bacteria)
-            processed += 1
-            if processed % 1000:
-                print(f"proceseed {processed} records, found: {len(possible_matches)}, matches")
-    return possible_matches
-
-
-
-
-
+###################################################
+# LOADING IN TEST DATA AND DATABASE
 home = expanduser("~")
-bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
+#bacteria_database = SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta")
 count = 0
-#record in bacteria_database:
-#    count = count + 1
-#    if count == 1:
-#        print(seq_record)
-#        break
-#print(count)
-#count = 0
-#print(seq_record.seq)
 
-#df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
+#bacteria_database = list(SeqIO.parse(home+'/pcr_product.fa','fasta'))
 
-bacteria_database = list(SeqIO.parse(home+'/pcr_product.fa','fasta'))
-
+#creating a bacteria objects for each bacteria in test data
 test_data = []
-
-#df = pd.read_csv(home + "/real_lab_data.csv", header=0)
 df = pd.read_csv(home + "/test_data_bacteria.csv", header=0)
-#df_new = df[df['AluI'].notnull()]
-
 for idx, row in df.iterrows():
     length_dict = create_dict_from_row(row)
     name = row['Bacteria Name']
     id = name
     test_data.append(BacteriaInfo(name, id, length_dict))
 
-#print(test_data[0])
+
+#################################################   MAIN PROGRAM    ####################################################
 
 rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])
 
-#print("starting database analysis: ")
-
-ecoli_seq = []
-
-#manually making test records
-test_record = {}
-
-
 print("starting database analysis: ")
-pcr_seq = []
-bac_list = []
-possible_matches = []
-seq_count = 0
+
 match_count = 0
-test_matches = {}
+possible_matches = []
 pcr_count = 0
 pcr_database = {}
-test_bac_found = False
+test_bac_registered = False
 test_bac_list = []
+test_matches = {}
 test_match_count = {}
 
 for result in test_data:
     test_match_count[result.name] = 0
 
-# '''
-# check if these are in the database
-
-count = 0
-
 pcr_database = list(SeqIO.parse(home + '/pcr_product.fa', 'fasta'))
 
+#iterate through the database and create bacteria objects
 print('Total PCR sequences: ', len(pcr_database))
 for seq_record in pcr_database:
     pcr_count = pcr_count + 1
@@ -190,44 +145,37 @@ for seq_record in pcr_database:
 
     test_count = 0
 
+    #iterate through the test dataset and compares fragment lengths from each enzyme with the database
     for result in test_data:
         test_count = test_count + 1
-        #        print ('test ', test_count, ':', end='')
-        #        print('HaeII: ', end='')
         haeIII = fragment_comparer(pcr.lengths[HaeIII], result.lengths['HaeIII'])
-        #        print('         MboI: ', end='')
         mboI = fragment_comparer(pcr.lengths[MboI], result.lengths['MboI'])
-        #        print(' AluI: ', end='')
         aluI = fragment_comparer(pcr.lengths[AluI], result.lengths['AluI'])
 
-        test_bac_found = False
+        test_bac_registered = False
+
+        #sequences are a match of fragment lengths in all three enzymes match
         if haeIII and mboI and aluI:
             match_count = match_count + 1
             possible_matches.append(seq_record)
 
             if match_count == 1:
-                test_bac_found = False
+                test_bac_registered = False
             else:
                 for element in test_bac_list:
                     if element.name == result.name:
-                        test_bac_found = True
+                        test_bac_registered = True
                         test_match_count[result.name] = test_match_count[result.name] + 1
 
-            if test_bac_found == False:
+            if test_bac_registered == False:
                 test_bac_list.append(result)
                 test_match_count[result.name] = test_match_count[result.name] + 1
 
     if pcr_count % 100000 == 0:
         print('in ', pcr_count, ' PCR sequences, found ', match_count, ' matches')
 
-# print(possible_matches)
+# PRINTING RESULTS
 print(test_bac_list)
-
-total = 0
-for match in test_data:
-    total = total + test_match_count[match.name]
-# print('total matches: ', total)
 print(test_match_count)
 
 
-rb = RestrictionBatch(['AluI', 'HaeIII', 'MboI'])

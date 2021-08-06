@@ -36,11 +36,3 @@ SeqIO.write(filtered_bacteria, home+'/pcr_product.fa', 'fasta')
 print("original bacteria database length", processed)
 print("Filtered length:",len(filtered_bacteria))
 
-
-'''
-for seq_record in SeqIO.parse(home + "/current_Bacteria_unaligned.fa", "fasta"):
-    print(seq_record.id)
-    print(repr(seq_record.seq))
-    print(len(seq_record))
-
-'''
